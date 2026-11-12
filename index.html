@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101820">
+  <title>کلمه | KALAMEH</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="کلمه"><span class="brand-mark">ک</span><span>کلمه</span><small>KALAMEH</small></a>
+    <nav><button class="nav-btn active" data-page="game">بازی</button><button class="nav-btn" data-page="leaderboard">برترین‌ها</button><button class="nav-btn" data-page="profile">پروفایل</button><button class="nav-btn" data-page="tournaments">مسابقات</button></nav>
+    <div class="top-actions"><button id="themeToggle" class="account-btn" type="button">☀️ حالت روشن</button><button id="adminBtn" class="account-btn">مدیریت</button><button id="accountBtn" class="account-btn">ورود / ثبت‌نام</button></div>
+  </header>
+
+  <main>
+    <section id="setup" class="panel setup-panel">
+      <div class="eyebrow">بازی حدس واژه</div>
+      <h1>هر روز، یک چالش تازه.</h1>
+      <p class="muted">زبانت را انتخاب کن، شش فرصت داری تا واژه پنهان را پیدا کنی.</p>
+      <div class="language-switch">
+        <button class="lang active" data-lang="fa">فارسی</button>
+        <button class="lang" data-lang="en">English</button>
+      </div>
+      <div class="rules">
+        <div><span class="sample green">ک</span><span><b>درست!</b><small>حرف و جایگاه درست است.</small></span></div>
+        <div><span class="sample yellow">ل</span><span><b>نزدیک شدی!</b><small>حرف در واژه هست، جای آن نه.</small></span></div>
+        <div><span class="sample gray">م</span><span><b>این یکی نه.</b><small>این حرف در واژه نیست.</small></span></div>
+      </div>
+      <button id="startBtn" class="primary wide">شروع بازی <span>←</span></button>
+      <p class="tiny muted" id="guestNote">برای ذخیره رکورد و حضور در جدول برترین‌ها، ابتدا حساب بساز یا وارد شو.</p>
+      <button id="dbSettingsBtn" class="text-btn" type="button">تنظیم اتصال دیتابیس</button>
+    </section>
+
+    <section id="game" class="game-area hidden">
+      <div class="game-heading"><div><div class="eyebrow">چالش امروز</div><h1 id="gameTitle">واژه پنج‌حرفی را پیدا کن</h1></div><div class="attempt-pill"><b id="attemptCount">۰</b><span>از ۶ فرصت</span></div></div>
+      <div id="board" class="board" aria-label="صفحه بازی"></div>
+      <div id="message" class="message" aria-live="polite">یک واژه پنج‌حرفی وارد کن.</div>
+      <div id="keyboard" class="keyboard"></div>
+      <div class="game-actions"><button id="newGameBtn" class="secondary">بازی جدید</button><button id="backBtn" class="text-btn">بازگشت</button></div>
+    </section>
+
+    <section id="leaderboard" class="panel hidden">
+      <div class="eyebrow">جام قهرمانان</div><h1>جدول برترین‌ها</h1>
+      <p class="muted">بازیکنانی که بیشترین برد را ثبت کرده‌اند.</p>
+      <div id="leaderRows" class="leader-list"><div class="loading">در حال دریافت جدول...</div></div>
+      <button class="secondary wide" id="refreshBoard">به‌روزرسانی</button>
+    </section>
+
+    <section id="profile" class="panel hidden">
+      <div class="eyebrow">حساب کاربری</div><h1 id="profileTitle">پروفایل بازیکن</h1>
+      <div class="profile-user"><span class="avatar">ک</span><div><b id="profileName">—</b><small id="profileUsername">—</small></div></div>
+      <div class="level-card"><div><small>سطح بازیکن</small><b id="profileLevel">تازه‌کار · سطح ۱</b></div><div class="level-track"><span id="levelProgress"></span></div><small id="levelXp">۰ امتیاز تجربه</small></div><div class="stats"><div><b id="statGames">۰</b><small>بازی</small></div><div><b id="statWins">۰</b><small>برد</small></div><div><b id="statBest">—</b><small>بهترین حدس</small></div></div><h3>سابقه بازی‌ها</h3><div id="profileHistory" class="leader-list"></div>
+      <button id="logoutBtn" class="secondary wide">خروج از حساب</button>
+    </section>
+
+    <section id="tournaments" class="panel hidden"><div class="eyebrow">رقابت‌های زمان‌دار</div><h1>مسابقات</h1><p class="muted">رتبه این بخش فقط از بازی‌های همین هفته محاسبه می‌شود و با برترین‌های کلی متفاوت است.</p><div class="tournament-card"><span class="tournament-icon">🏆</span><div><b>جام هفتگی کلمه</b><small id="tournamentPeriod">از دوشنبه تا یکشنبه · بر اساس بردهای همین هفته</small></div><span class="tournament-status">در جریان</span></div><div class="tournament-summary"><div><small>بازیکنان شرکت‌کننده</small><b id="tournamentPlayers">—</b></div><div><small>بازی‌های این هفته</small><b id="tournamentGames">—</b></div></div><h3>جدول مسابقه هفتگی</h3><div id="tournamentRows" class="leader-list"><div class="loading">در حال دریافت نتایج مسابقه...</div></div><button class="secondary wide" id="tournamentRefresh">به‌روزرسانی مسابقات</button></section>
+    <footer><span>کلمه © ۲۰۲۶</span><span>ساخته‌شده برای عاشقان واژه</span></footer>
+  </main>
+
+  <dialog id="authDialog">
+    <form method="dialog" class="dialog-close"><button aria-label="بستن">×</button></form>
+    <div class="eyebrow">به جمع کلمه‌بازها بپیوند</div><h2 id="authTitle">ساخت حساب</h2>
+    <div class="auth-tabs"><button class="active" data-auth="register">ثبت‌نام</button><button data-auth="login">ورود</button></div>
+    <label id="nameLabel">نام کاربری<input id="registerUsername" maxlength="24" autocomplete="username" placeholder="مثلاً kalameh_player"></label>
+    <label id="usernameLabel" class="hidden">نام کاربری<input id="usernameInput" maxlength="24" autocomplete="username" placeholder="نام کاربری شما"></label>
+    <label>رمز عبور<input id="passwordInput" type="password" minlength="8" autocomplete="new-password" placeholder="حداقل ۸ نویسه"></label>
+    <p class="tiny muted">نام کاربری را خودت انتخاب کن. برای ورود دوباره، همین نام کاربری و رمز عبور را لازم داری.</p>
+    <button id="authSubmit" class="primary wide">ساخت حساب</button>
+    <p id="authMessage" class="message"></p>
+  </dialog>
+  <dialog id="dbSettingsDialog">
+    <form method="dialog" class="dialog-close"><button aria-label="بستن">×</button></form>
+    <div class="eyebrow">تنظیم یک‌باره</div><h2>اتصال به Supabase</h2>
+    <label>Project URL<input id="supabaseUrlInput" type="url" placeholder="https://xxxxx.supabase.co" autocomplete="off"></label>
+    <label>Publishable key یا anon key<input id="supabaseKeyInput" type="password" placeholder="کلید عمومی پروژه" autocomplete="off"></label>
+    <p class="tiny muted">فقط کلید عمومی Publishable یا anon را وارد کن. هرگز service_role یا Secret key را وارد نکن. مقادیر روی همین مرورگر ذخیره می‌شوند.</p>
+    <button id="saveDbSettingsBtn" class="primary wide" type="button">ذخیره تنظیمات</button><p id="dbSettingsMessage" class="message"></p>
+  </dialog>
+  <dialog id="adminDialog" class="admin-dialog">
+    <form method="dialog" class="dialog-close"><button aria-label="بستن">×</button></form>
+    <div class="eyebrow">دسترسی اختصاصی مدیر</div><h2>مرکز فرماندهی کلمه</h2>
+    <div id="adminLoginPanel" class="admin-login-panel">
+      <p class="muted">ورود فقط برای حساب مدیریتی تأییدشده مجاز است.</p>
+      <label>ایمیل مدیر<input id="adminEmail" type="email" value="arzhinghafori@gmail.com" readonly autocomplete="username" dir="ltr"></label>
+      <label>رمز عبور حساب مدیر<input id="adminPassword" type="password" autocomplete="current-password" placeholder="رمز حساب Supabase Auth"></label>
+      <button id="adminLoginBtn" class="primary wide">ورود امن به مدیریت</button>
+    </div>
+    <p id="adminMessage" class="message" role="status"></p>
+    <div id="adminContent" class="hidden">
+      <div class="admin-welcome"><span>🛡️</span><div><b>مدیریت احراز هویت‌شده</b><small>arzhinghafori@gmail.com</small></div><span class="admin-secure">امن</span></div>
+      <div class="admin-kpis"><div><small>بازیکنان</small><b id="adminUsers">۰</b></div><div><small>کل بازی‌ها</small><b id="adminGames">۰</b></div><div><small>نرخ برد</small><b id="adminWinRate">۰٪</b></div><div><small>بردهای ثبت‌شده</small><b id="adminWins">۰</b></div></div>
+      <section class="admin-chart-card"><div class="admin-section-head"><h3>فعالیت هفت روز اخیر</h3><button id="adminRefreshBtn" class="text-btn" type="button">↻ تازه‌سازی</button></div><canvas id="adminActivityChart" height="160" aria-label="نمودار تعداد بازی‌ها در هفت روز اخیر"></canvas><div class="admin-chart-legend"><span>● تعداد بازی‌های ثبت‌شده</span></div></section>
+      <div class="admin-columns"><section><h3>بازیکنان</h3><div id="adminUserRows" class="leader-list admin-scroll"></div></section><section><h3>فعالیت‌های اخیر</h3><div id="adminHistoryRows" class="leader-list admin-scroll"></div></section></div>
+      <button id="adminLogoutBtn" class="secondary wide">خروج امن از مدیریت</button>
+    </div>
+  </dialog>
+  <script src="app.js"></script>
+</body>
+</html>
